@@ -9,6 +9,7 @@ import (
 	"time"
 	//"crypto/sha256"
 	"encoding/json"
+	"flag"
 	"github.com/syndtr/goleveldb/leveldb"
 )
 
@@ -27,7 +28,7 @@ type HostJob int
 type ConfirmGeneration struct {
 	confirmRound     int
 	confirmServerNum int
-	generation       Generation
+	generation       *Generation
 }
 
 /* ==== Define Type End ===== */
@@ -37,8 +38,8 @@ type ConfirmGeneration struct {
 var levelDB *leveldb.DB
 var err error
 var nodePool []string
-var lastGeneration Generation
-var currentGeneration Generation
+var lastGeneration *Generation
+var currentGeneration *Generation
 
 /* ==== Claim Global Var End ===== */
 
@@ -71,7 +72,21 @@ func (t *HostJob) GatherTransactions(args string, reply *int) error {
 	return nil
 }
 
-func (t *HostJob) confirmGeneration(args Generation, reply *int) error {
+func (t *HostJob) TestSaveNewGeneration(args string, reply *int) error {
+	genesisGeneration := &Generation{
+		id:                0,
+		hash:              [32]byte{},
+		previousHash:      [32]byte{},
+		timestamp:         time.Date(2017, time.December, 25, 23, 0, 0, 0, time.UTC).Unix(), // time.Now().Unix()
+		previousTimestamp: time.Date(2017, time.December, 25, 23, 0, 0, 0, time.UTC).Unix(),
+		data:              [1024]byte{},
+	}
+	saveNewGeneration(genesisGeneration)
+	*reply = 1
+	return nil
+}
+
+func (t *HostJob) ConfirmGeneration(args Generation, reply *int) error {
 	if args.hash == currentGeneration.hash { // compare with yourself
 		*reply = 1
 	} else {
@@ -80,7 +95,7 @@ func (t *HostJob) confirmGeneration(args Generation, reply *int) error {
 	return nil
 }
 
-func (t *HostJob) miningCompetition(args string, reply *int) error {
+func (t *HostJob) MiningCompetition(args string, reply *int) error {
 	log.Print("Init the Mining Dealer.")
 	// Temprorily Simplify the Mining Period
 	if time.Now().Unix()-lastGeneration.timestamp == 10 {
@@ -134,7 +149,6 @@ func LocalMain() {
 	checkError(err)
 	rpcClient := rpc.NewClient(conn)
 	for {
-
 		rpcClient.Call("HostJob.GetNodePool", 0, &nodePool)
 		log.Print(nodePool)
 		time.Sleep(10 * time.Second)
@@ -164,11 +178,11 @@ func broadcastGeneration() {
 	// }
 }
 
-func saveNewGeneration(newestGeneration Generation) {
+func saveNewGeneration(newestGeneration *Generation) {
 	// Just save the total Generation Object
 	// into the leveldb in the form of Json.
 	// key: id (height) value: object json
-	json.Marshal(newestGeneration)
+	log.Print(json.Marshal(newestGeneration))
 }
 
 func checkError(err error) {
@@ -224,8 +238,21 @@ func main() {
 	log.Print(genesisGeneration) // for reserving the gensis, will be del
 
 	nodePool = []string{"119.28.176.178"}
-	go HostMain()
-	go LocalMain()
+
+	hostSwitch := flag.Bool("h", false, "Start Host")
+	localSwitch := flag.Bool("l", false, "Start Client")
+	flag.Parse()
+
+	if *hostSwitch == true {
+		log.Print("Host Switch is", *hostSwitch)
+		go HostMain()
+	}
+
+	if *localSwitch == true {
+		log.Print("Local Switch is", *localSwitch)
+		go LocalMain()
+	}
+
 	for {
 		time.Sleep(10)
 	}
