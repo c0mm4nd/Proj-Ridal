@@ -164,6 +164,10 @@ func broadcastGeneration() {
 	// }
 }
 
+func calcHash() {
+
+}
+
 func saveNewGeneration(newestGeneration Generation) {
 	// Just save the total Generation Object
 	// into the leveldb in the form of Json.
@@ -195,7 +199,7 @@ func startInitLocalGeneration() {
 /* ============================================================================*/
 
 func main() {
-	levelDB, err = leveldb.OpenFile("level.db", nil)
+	levelDB, err = leveldb.OpenFile("data", nil)
 	if err != nil {
 		log.Print("err is ", err)
 	} else {
