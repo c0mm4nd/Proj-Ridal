@@ -2,17 +2,16 @@ package bliss
 
 import (
 	"github.com/LoCCS/bliss"
-	hcashcrypto "github.com/HcashOrg/hcashd/crypto"
+	Crypto "github.com/maoxs2/Proj-Ridal/crypto"
 )
 
-type PrivateKey struct{
-	hcashcrypto.PrivateKeyAdapter
+type PrivateKey struct {
+	Crypto.PrivateKeyAdapter
 	bliss.PrivateKey
 }
 
-
 // Public returns the PublicKey corresponding to this private key.
-func (p PrivateKey) PublicKey() (hcashcrypto.PublicKey) {
+func (p PrivateKey) PublicKey() Crypto.PublicKey {
 	blissPkp := p.PrivateKey.PublicKey()
 	pk := &PublicKey{
 		PublicKey: *blissPkp,
@@ -25,6 +24,6 @@ func (p PrivateKey) GetType() int {
 	return pqcTypeBliss
 }
 
-func (p PrivateKey) Serialize() []byte{
+func (p PrivateKey) Serialize() []byte {
 	return p.PrivateKey.Serialize()
 }

@@ -7,8 +7,9 @@ import (
 	"net"
 	"net/rpc"
 	// "strconv"
-	gxMgr "github.com/maoxs2/Proj_Ridal/generationManager"
 	"time"
+
+	gxMgr "github.com/maoxs2/Proj-Ridal/gxMgr"
 )
 
 /* ==== Define Type Start ===== */
