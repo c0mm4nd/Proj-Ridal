@@ -1,0 +1,6 @@
+curl-example
+
+curl -H "Content-Type:application/json" -X POST --data '{"method":"HttpService.MineBlocks", "params":["123"]}' http://127.0.0.1:8080/
+
+
+curl -H "Content-Type:application/json" -X POST --data '{"method":"HttpService.MineBlocks", "params":[{"Args":"111"}]}' http://127.0.0.1:8080/
